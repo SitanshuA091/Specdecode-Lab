@@ -1,5 +1,6 @@
 import torch
 from transformers import AutoTokenizer, AutoModelForCausalLM
+import argparse
 
 MODEL_ID = "Qwen/Qwen2.5-1.5B-Instruct"
 
@@ -89,7 +90,29 @@ def greedy_decode(prompt, max_new_tokens=64):
 
 
 if __name__ == "__main__":
-    result = greedy_decode(
-        "Explain how a transformer language model generates text."
+    parser = argparse.ArgumentParser(
+        description="Baseline greedy decoding"
     )
+
+    parser.add_argument(
+        "--prompt",
+        type=str,
+        required=True,
+        help="Input prompt for the model",
+    )
+
+    parser.add_argument(
+        "--max-new-tokens",
+        type=int,
+        default=64,
+    )
+
+    args = parser.parse_args()
+
+    result = greedy_decode(
+        args.prompt,
+        max_new_tokens=args.max_new_tokens,
+    )
+
+    print("\nGenerated response:\n")
     print(result)

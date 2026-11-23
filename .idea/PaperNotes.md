@@ -26,3 +26,31 @@ all popular sampling methods rop-k argmax can easily be cast into a standard sam
 
 ### Speculative Sampling
 to sample x ~ p(x) we instead sample x ~ q(x) keeping q(x) <= p(x) and q(x) > p(x) we reject the sample with probability 1 - p(x) / q(x) and sample x again from an adjusted distribution  p'(x) = norm(max(0, p(x) - q(x))) instead.
+
+- given distribution q(x) obtained from running Mq on a conditioning prefix, we can sample a token x<sub>1</sub> ~ q(x).
+
+- the prefix may look like - `The cat is` tokens can further sampled  by the draft model - `sitting` then further it comes q(`The cat is sitting`).
+
+- Given the distribution q(x) obtained from running M<sub>q</sub> model and then we calculate the distribution p(x) by running Mp on prefix while in parallel speculatively calculating the distribution of the next token x2 by running Mp on prefix + [x1]. Once both computations complete we proceed further same as above.
+- If x1 is rejected we discard the computation x2 and resample from x1 from an adjusted distribution if x1 is accepted we keep both tokens
+
+### Algorithm
+Inputs: M<sub>p</sub>, M<sub>q</sub>
+sample Y guesses x1,...y from Mq autoregrssively  
+```
+for i = 1 to Y: 
+we do   
+qi(x) <-- Mq( prefix + [ x1, ...xi-1] )  
+xi ~ qi(x)
+end for 
+Run Mp in parallel
+p1(x)...py+1(x) <-- Mp(prefix)....Mp(prefix + [x1,....xy])
+determine the number of accepted guesses n
+r1 ~ U(0, 1),..., ry ~ U(0,1)
+n <-- min({i-1 | 1<= i <= y, ri > pi(x)/qi(x)}U{Y})
+adjust the distribution from Mp if needed   
+p'(x) <- norm(max(0, pn+1(x) - qn+1(x)))
+end if
+return one token from Mp, and n tokens from Mq
+retrun prefix + [x1, ..., xn, t]
+```
