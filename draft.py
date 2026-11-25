@@ -1,4 +1,3 @@
-
 import argparse
 import torch
 from transformers import AutoTokenizer, AutoModelForCausalLM
@@ -19,18 +18,19 @@ model.eval()
 
 @torch.inference_mode()
 def generate_draft(prompt, k=5):
-
+    
     messages = [{"role": "user", "content": prompt}]
-    input_ids = tokenizer.apply_chat_template(
+    inputs = tokenizer.apply_chat_template(
         messages,
         tokenize=True,
         add_generation_prompt=True,
         return_tensors="pt",
-    ).to(device)
+        return_dict=True,
+        ).to(device)
+    input_ids = inputs["input_ids"]
+    attention_mask = inputs["attention_mask"]
 
-    attention_mask = torch.ones_like(input_ids)
-
-    # Prefill: process the complete prompt.
+    # Prefill - process the complete prompt
     outputs = model(
         input_ids=input_ids,
         attention_mask=attention_mask,
