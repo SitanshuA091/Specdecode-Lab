@@ -21,16 +21,16 @@ model.eval()
 def greedy_decode(prompt, max_new_tokens=64):
 
     messages = [{"role": "user", "content": prompt}]
-
-    input_ids = tokenizer.apply_chat_template(
+    inputs = tokenizer(
+    tokenizer.apply_chat_template(
         messages,
-        tokenize=True,
-        add_generation_prompt=True,
-        return_tensors="pt",
+        tokenize=False,
+        add_generation_prompt=True,),
+    return_tensors="pt",
     ).to(device)
-
-    attention_mask = torch.ones_like(input_ids)
-
+    
+    input_ids = inputs["input_ids"]
+    attention_mask = inputs["attention_mask"]
     # PREFILL: Process the entire prompt.
     outputs = model(
         input_ids=input_ids,
