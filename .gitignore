@@ -25,10 +25,9 @@ wandb/
 
 # Editor
 .vscode/
-.idea/
 *.swp
 *.swo
-
+*.pdf
 # OS
 .DS_Store
 Thumbs.db
